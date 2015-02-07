@@ -475,6 +475,9 @@ This value defaults to `true`. Whether or not manage the pg_hba.conf. If set to 
 ####`manage_pg_ident_conf`
 This value defaults to `true`. Whether or not manage the pg_ident.conf. If set to `true`, puppet will overwrite this file. If set to `false`, puppet will not modify the file.
 
+####`manage_recovery_conf`
+This value defaults to `false`. Whether or not manage the recovery.conf. If set to `true`, puppet will overwrite this file. If set to `false`, puppet will not create the file.
+
 ###Class: postgresql::client
 
 This class installs postgresql client software. Alter the following parameters if you have a custom version you would like to install (Note: don't forget to make sure to add any necessary yum or apt repositories if specifying a custom version):
@@ -738,6 +741,45 @@ This provides the target for the rule, and is generally an internal only propert
 
 ###Resource: postgresql::server::pg\_ident\_rule
 This defined type allows you to create user name maps for `pg_ident.conf`. For more details see the [PostgreSQL documentation](http://www.postgresql.org/docs/9.4/static/auth-username-maps.html).
+
+For example:
+
+    postgresql::server::pg_ident_rule{ 'Map the SSL certificate of the backup server as a replication user':
+      map_name          => 'sslrepli',
+      system_username   => 'repli1.example.com',
+      database_username => 'replication',
+    }
+
+This would create a user name map in `pg_ident.conf` similar to:
+
+    # Rule Name: Map the SSL certificate of the backup server as a replication user
+    # Description: none
+    # Order: 150
+    sslrepli	repli1.example.com	replication
+
+####`namevar`
+A unique identifier or short description for this rule. The namevar doesn't provide any functional usage, but it is stored in the comments of the produced `pg_ident.conf` so the originating resource can be identified.
+
+####`description`
+A longer description for this rule if required. Defaults to `none`. This description is placed in the comments above the rule in `pg_ident.conf`.
+
+####`map_name`
+Name of the user map, that is used to refer to this mapping in `pg_hba.conf`.
+
+####`system_username`
+Operating system user name, the user name used to connect to the database.
+
+####`database_username`
+Database user name, the user name of the the database user. The `system_username` will be mapped to this user name.
+
+####`order`
+An order for placing the mapping in pg_ident.conf. Defaults to 150.
+
+####`target`
+This provides the target for the rule, and is generally an internal only property. Use with caution.
+
+###Resource: postgresql::server::recovery\_rule
+This defined type allows you to create config for `recovery.conf`. For more details see the [PostgreSQL documentation](http://www.postgresql.org/docs/9.4/static/auth-username-maps.html).
 
 For example:
 

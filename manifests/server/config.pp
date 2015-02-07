@@ -9,12 +9,14 @@ class postgresql::server::config {
   $pg_hba_conf_path           = $postgresql::server::pg_hba_conf_path
   $pg_ident_conf_path         = $postgresql::server::pg_ident_conf_path
   $postgresql_conf_path       = $postgresql::server::postgresql_conf_path
+  $recovery_conf_path         = $postgresql::server::recovery_conf_path
   $pg_hba_conf_defaults       = $postgresql::server::pg_hba_conf_defaults
   $user                       = $postgresql::server::user
   $group                      = $postgresql::server::group
   $version                    = $postgresql::server::_version
   $manage_pg_hba_conf         = $postgresql::server::manage_pg_hba_conf
   $manage_pg_ident_conf       = $postgresql::server::manage_pg_ident_conf
+  $manage_recovery_conf       = $postgresql::server::manage_recovery_conf
   $datadir                    = $postgresql::server::datadir
 
   if ($manage_pg_hba_conf == true) {
@@ -131,6 +133,17 @@ class postgresql::server::config {
       owner  => $user,
       group  => $group,
       force  => true, # do not crash if there is no pg_ident_rules
+      mode   => '0640',
+      warn   => true,
+      notify => Class['postgresql::server::reload'],
+    }
+  }
+
+  if ($manage_recovery_conf == true) {
+    concat { $pg_ident_conf_path:
+      owner  => $user,
+      group  => $group,
+      force  => true, # do not crash if there is no pg_recovery_rules
       mode   => '0640',
       warn   => true,
       notify => Class['postgresql::server::reload'],
